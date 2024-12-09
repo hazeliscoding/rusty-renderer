@@ -1,7 +1,5 @@
 use std::io::Read;
 
-use sdl2::pixels::Color;
-
 use crate::triangle::Face;
 use crate::vector;
 
