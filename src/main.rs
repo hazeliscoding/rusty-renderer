@@ -11,6 +11,8 @@ use vector::{Vec2, Vec3};
 
 mod display;
 mod vector;
+mod triangle;
+mod mesh;
 
 /// Main renderer struct responsible for managing SDL context, rendering, and state.
 struct Renderer {
@@ -20,6 +22,8 @@ struct Renderer {
     canvas: Canvas<Window>,
     /// Color buffer holding pixel data for rendering.
     color_buffer: Vec<u8>,
+    /// List of triangles to render on the screen.
+    triangles_to_render: Vec<triangle::Triangle>,
     /// Application running state.
     is_running: bool,
 }
@@ -44,6 +48,7 @@ impl Renderer {
             sdl_context,
             canvas,
             color_buffer,
+            triangles_to_render: Vec::new(),
             is_running: true,
         }
     }
