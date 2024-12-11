@@ -1,5 +1,7 @@
+use std::ops::{Add, Div, Mul, Neg, Sub};
+
 /// A 2D vector struct, representing a point or direction in 2D space.
-#[derive(Debug, Clone, Copy)] // Allows Vec2 to be dubugged, copied and cloned.
+#[derive(Debug, Copy, Clone)]
 pub struct Vec2 {
     /// The x-coordinate of the vector.
     pub(crate) x: f32,
@@ -7,21 +9,21 @@ pub struct Vec2 {
     pub(crate) y: f32,
 }
 
-#[allow(dead_code)] // Suppresses warnings for unused functions.
-/// Creates a new instance of the `Vec2` struct.
-///
-/// # Arguments
-/// - `x`: The x-coordinate of the vector.
-/// - `y`: The y-coordinate of the vector.
-///
-/// # Returns
-/// A new instance of the `Vec2` struct.
+#[allow(dead_code)]
 impl Vec2 {
+    /// Creates a new instance of the `Vec2` struct.
+    ///
+    /// # Arguments
+    /// - `x`: The x-coordinate of the vector.
+    /// - `y`: The y-coordinate of the vector.
+    ///
+    /// # Returns
+    /// A new instance of `Vec2`.
     pub fn new(x: f32, y: f32) -> Vec2 {
         Vec2 { x, y }
     }
 
-    /// Calculates the dot product of two vectors.
+    /// Calculates the dot product of two 2D vectors.
     ///
     /// # Arguments
     /// - `self`: The first vector.
@@ -29,103 +31,147 @@ impl Vec2 {
     ///
     /// # Returns
     /// The dot product as a `f32` value.
-    ///
-    /// # Formula
-    /// The dot product of two vectors `a` and `b` is calculated as:
-    /// `a.x * b.x + a.y * b.y`.
     pub fn dot(&self, other: Vec2) -> f32 {
         self.x * other.x + self.y * other.y
     }
 
-    /// Adds another vector to this vector.
-    ///
-    /// # Arguments
-    /// - `self`: The first `Vec2` to add to.
-    /// - `other`: The other `Vec2` to add to this vector.
+    /// Calculates the length (magnitude) of the vector.
     ///
     /// # Returns
-    /// A new `Vec2` representing the sum.
-    ///
-    /// # Formula
-    /// The sum of two vectors `a` and `b` is calculated as:
-    /// `a.x + b.x` and `a.y + b.y`.
-    pub fn add(&self, other: Vec2) -> Vec2 {
-        Vec2 {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-
-    /// Subtracts another vector from this vector.
-    ///
-    /// # Arguments
-    /// - `other`: The other `Vec2` to subtract from this vector.
-    ///
-    /// # Returns
-    /// A new `Vec2` representing the difference.
-    pub fn sub(&self, other: Vec2) -> Vec2 {
-        Vec2 {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-
-    /// Multiplies this vector by a scalar value.
-    ///
-    /// # Arguments
-    /// - `self`: The `Vec2` to multiply.
-    /// - `scalar`: The scalar value to multiply this vector by.
-    ///
-    /// # Returns
-    /// A new `Vec2` representing the product.
-    ///
-    /// # Formula
-    /// The product of a vector `a` and a scalar `s` is calculated as:
-    /// `a.x * s` and `a.y * s`.
-    pub fn mul(&self, scalar: f32) -> Vec2 {
-        Vec2 {
-            x: self.x * scalar,
-            y: self.y * scalar,
-        }
-    }
-
-    /// Divides this vector by a scalar value.
-    ///
-    /// # Arguments
-    /// - `self`: The `Vec2` to divide.
-    /// - `scalar`: The scalar value to divide this vector by.
-    ///
-    /// # Returns
-    /// A new `Vec2` representing the quotient.
-    ///
-    /// # Formula
-    /// The quotient of a vector `a` and a scalar `s` is calculated as:
-    /// `a.x / s` and `a.y / s`.
-    pub fn div(&self, scalar: f32) -> Vec2 {
-        Vec2 {
-            x: self.x / scalar,
-            y: self.y / scalar,
-        }
-    }
-
-    /// Calculates the length of the vector.
-    ///
-    /// # Arguments
-    /// - `self`: The vector to calculate the length of.
-    ///
-    /// # Returns
-    /// The length of the vector as a `f32` value.
-    ///
-    /// # Formula
-    /// The length of a vector `a` is calculated as:
-    /// `sqrt(a.x^2 + a.y^2)`.
+    /// The length as a `f32` value.
     pub fn len(&self) -> f32 {
         self.dot(*self).sqrt()
     }
 }
 
+/// Implements the subtraction operator for `Vec2`.
+///
+/// # Arguments
+/// - `self`: The minuend `Vec2`.
+/// - `other`: The subtrahend `Vec2`.
+///
+/// # Returns
+/// A new `Vec2` representing the difference.
+///
+/// # Example
+/// ```
+/// let a = Vec2::new(3.0, 4.0);
+/// let b = Vec2::new(1.0, 2.0);
+/// let result = a - b; // Vec2 { x: 2.0, y: 2.0 }
+/// ```
+impl Sub for Vec2 {
+    type Output = Vec2;
+
+    fn sub(self, other: Vec2) -> Vec2 {
+        Vec2 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
+
+/// Implements the addition operator for `Vec2`.
+///
+/// # Arguments
+/// - `self`: The first vector.
+/// - `other`: The second vector.
+///
+/// # Returns
+/// A new `Vec2` representing the sum.
+///
+/// # Example
+/// ```
+/// let a = Vec2::new(3.0, 4.0);
+/// let b = Vec2::new(1.0, 2.0);
+/// let result = a + b; // Vec2 { x: 4.0, y: 6.0 }
+/// ```
+impl Add for Vec2 {
+    type Output = Vec2;
+
+    fn add(self, other: Vec2) -> Vec2 {
+        Vec2 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+/// Implements scalar multiplication for `Vec2`.
+///
+/// # Arguments
+/// - `self`: The vector to be multiplied.
+/// - `scalar`: The scalar value.
+///
+/// # Returns
+/// A new `Vec2` representing the product.
+///
+/// # Example
+/// ```
+/// let v = Vec2::new(3.0, 4.0);
+/// let result = v * 2.0; // Vec2 { x: 6.0, y: 8.0 }
+/// ```
+impl Mul<f32> for Vec2 {
+    type Output = Vec2;
+
+    fn mul(self, scalar: f32) -> Vec2 {
+        Vec2 {
+            x: self.x * scalar,
+            y: self.y * scalar,
+        }
+    }
+}
+
+/// Implements scalar division for `Vec2`.
+///
+/// # Arguments
+/// - `self`: The vector to be divided.
+/// - `scalar`: The scalar value.
+///
+/// # Returns
+/// A new `Vec2` representing the quotient.
+///
+/// # Example
+/// ```
+/// let v = Vec2::new(6.0, 8.0);
+/// let result = v / 2.0; // Vec2 { x: 3.0, y: 4.0 }
+/// ```
+impl Div<f32> for Vec2 {
+    type Output = Vec2;
+
+    fn div(self, scalar: f32) -> Vec2 {
+        Vec2 {
+            x: self.x / scalar,
+            y: self.y / scalar,
+        }
+    }
+}
+
+/// Implements the negation operator for `Vec2`.
+///
+/// # Arguments
+/// - `self`: The vector to be negated.
+///
+/// # Returns
+/// A new `Vec2` with the negated components.
+///
+/// # Example
+/// ```
+/// let v = Vec2::new(3.0, 4.0);
+/// let result = -v; // Vec2 { x: -3.0, y: -4.0 }
+/// ```
+impl Neg for Vec2 {
+    type Output = Vec2;
+
+    fn neg(self) -> Vec2 {
+        Vec2 {
+            x: -self.x,
+            y: -self.y,
+        }
+    }
+}
+
 /// A 3D vector struct, representing a point or direction in 3D space.
-#[derive(Debug, Copy, Clone)] // Allows Vec3 to be debugged, copied, and cloned.
+#[derive(Debug, Copy, Clone)]
 pub struct Vec3 {
     /// The x-coordinate of the vector.
     pub x: f32,
@@ -135,8 +181,9 @@ pub struct Vec3 {
     pub z: f32,
 }
 
+#[allow(dead_code)]
 impl Vec3 {
-    /// Creates a new `Vec3` instance.
+    /// Creates a new instance of the `Vec3` struct.
     ///
     /// # Arguments
     /// - `x`: The x-coordinate of the vector.
@@ -144,109 +191,86 @@ impl Vec3 {
     /// - `z`: The z-coordinate of the vector.
     ///
     /// # Returns
-    /// A `Vec3` instance with the given x, y, and z values.
+    /// A new instance of `Vec3`.
     pub fn new(x: f32, y: f32, z: f32) -> Vec3 {
         Vec3 { x, y, z }
     }
 
-    /// Calculates the dot product of two vectors.
+    /// Rotates the vector around the X-axis.
+    ///
+    /// # Arguments
+    /// - `angle`: The rotation angle in radians.
+    ///
+    /// # Returns
+    /// A new rotated `Vec3`.
+    pub fn rotate_x(&self, angle: f32) -> Vec3 {
+        let y = self.y * angle.cos() - self.z * angle.sin();
+        let z = self.y * angle.sin() + self.z * angle.cos();
+        Vec3 { x: self.x, y, z }
+    }
+
+    /// Rotates the vector around the Y-axis.
+    ///
+    /// # Arguments
+    /// - `angle`: The rotation angle in radians.
+    ///
+    /// # Returns
+    /// A new rotated `Vec3`.
+    pub fn rotate_y(&self, angle: f32) -> Vec3 {
+        let x = self.x * angle.cos() + self.z * angle.sin();
+        let z = -self.x * angle.sin() + self.z * angle.cos();
+        Vec3 { x, y: self.y, z }
+    }
+
+    /// Rotates the vector around the Z-axis.
+    ///
+    /// # Arguments
+    /// - `angle`: The rotation angle in radians.
+    ///
+    /// # Returns
+    /// A new rotated `Vec3`.
+    pub fn rotate_z(&self, angle: f32) -> Vec3 {
+        let x = self.x * angle.cos() - self.y * angle.sin();
+        let y = self.x * angle.sin() + self.y * angle.cos();
+        Vec3 { x, y, z: self.z }
+    }
+
+    /// Calculates the dot product of two 3D vectors.
     ///
     /// # Arguments
     /// - `self`: The first vector.
     /// - `other`: The second vector.
     ///
     /// # Returns
-    /// The dot product as a `Vec3` value.
-    ///
-    /// # Formula
-    /// The dot product of two vectors `a` and `b` is calculated as:
-    /// `a x b = (a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x)`.
+    /// The dot product as a `f32` value.
     pub fn dot(&self, other: Vec3) -> f32 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    /// Multiplies this vector by a scalar value.
-    ///
-    /// # Arguments
-    /// - `self`: The vector to multiply.
-    /// - `scalar`: The scalar value to multiply this vector by.
+    /// Calculates the length (magnitude) of the vector.
     ///
     /// # Returns
-    /// A new `Vec3` representing the product.
-    ///
-    /// # Formula
-    /// The product of a vector `a` and a scalar `s` is calculated as:
-    /// `a.x * s`, `a.y * s`, and `a.z * s`.
-    pub fn mul(&self, scalar: f32) -> Vec3 {
-        Vec3 {
-            x: self.x * scalar,
-            y: self.y * scalar,
-            z: self.z * scalar,
-        }
-    }
-
-    /// Divides this vector by a scalar value.
-    /// 
-    /// # Arguments
-    /// - `self`: The vector to divide.
-    /// - `scalar`: The scalar value to divide this vector by.
-    /// 
-    /// # Returns
-    /// A new `Vec3` representing the quotient.
-    /// 
-    /// # Formula
-    /// The quotient of a vector `a` and a scalar `s` is calculated as:
-    /// `a.x / s`, `a.y / s`, and `a.z / s`.
-    pub fn div(&self, scalar: f32) -> Vec3 {
-        Vec3 {
-            x: self.x / scalar,
-            y: self.y / scalar,
-            z: self.z / scalar,
-        }
-    }
-
-    /// Calculates the length of the vector.
-    /// 
-    /// # Arguments
-    /// - `self`: The vector to calculate the length of.
-    /// 
-    /// # Returns
-    /// The length of the vector as a `f32` value.
-    /// 
-    /// # Formula
-    /// The length of a vector `a` is calculated as:
-    /// `sqrt(a.x^2 + a.y^2 + a.z^2)`.
+    /// The length as a `f32` value.
     pub fn len(&self) -> f32 {
         self.dot(*self).sqrt()
     }
 
     /// Normalizes the vector.
-    /// 
-    /// # Arguments 
-    /// - `self`: The vector to normalize.
-    /// 
+    ///
     /// # Returns
-    /// A new `Vec3` representing the normalized vector.
-    /// 
-    /// # Formula
-    /// The normalized vector `a` is calculated as:
-    /// `a / |a|`.
+    /// A new `Vec3` with a magnitude of 1.
     pub fn normalize(&self) -> Vec3 {
         self.div(self.len())
     }
 
-    /// Calculates the cross product of two vectors.
-    /// 
+    /// Calculates the cross product of two 3D vectors.
+    ///
     /// # Arguments
     /// - `self`: The first vector.
     /// - `other`: The second vector.
-    /// 
+    ///
     /// # Returns
-    /// The cross product as a `Vec3` value.
-    /// 
-    /// # Formula
-    /// The cross product of two vectors `a` and `b` is calculated as:
-    /// `a x b = (a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x)`.
+    /// A new `Vec3` representing the cross product.
     pub fn cross(&self, other: Vec3) -> Vec3 {
         Vec3 {
             x: self.y * other.z - self.z * other.y,
@@ -254,61 +278,135 @@ impl Vec3 {
             z: self.x * other.y - self.y * other.x,
         }
     }
+}
 
-    /// Rotates the vector around the X-axis by a given angle.
-    ///
-    /// # Arguments
-    /// - `angle`: The rotation angle in radians.
-    ///
-    /// # Returns
-    /// A new `Vec3` after rotation.
-    ///
-    /// # Formula
-    /// ```
-    /// y' = y * cos(angle) - z * sin(angle)
-    /// z' = y * sin(angle) + z * cos(angle)
-    /// ```
-    pub fn rotate_x(&self, angle: f32) -> Vec3 {
-        let y = self.y * angle.cos() - self.z * angle.sin();
-        let z = self.y * angle.sin() + self.z * angle.cos();
-        Vec3 { x: self.x, y, z }
+/// Implements the subtraction operator for `Vec3`.
+///
+/// # Arguments
+/// - `self`: The minuend `Vec3`.
+/// - `other`: The subtrahend `Vec3`.
+///
+/// # Returns
+/// A new `Vec3` representing the difference.
+///
+/// # Example
+/// ```
+/// let a = Vec3::new(3.0, 4.0, 5.0);
+/// let b = Vec3::new(1.0, 2.0, 3.0);
+/// let result = a - b; // Vec3 { x: 2.0, y: 2.0, z: 2.0 }
+/// ```
+impl Sub for Vec3 {
+    type Output = Vec3;
+
+    fn sub(self, other: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
     }
+}
 
-    /// Rotates the vector around the Y-axis by a given angle.
-    ///
-    /// # Arguments
-    /// - `angle`: The rotation angle in radians.
-    ///
-    /// # Returns
-    /// A new `Vec3` after rotation.
-    ///
-    /// # Formula
-    /// ```
-    /// x' = x * cos(angle) + z * sin(angle)
-    /// z' = -x * sin(angle) + z * cos(angle)
-    /// ```
-    pub fn rotate_y(&self, angle: f32) -> Vec3 {
-        let x = self.x * angle.cos() + self.z * angle.sin();
-        let z = -self.x * angle.sin() + self.z * angle.cos();
-        Vec3 { x, y: self.y, z }
+/// Implements the addition operator for `Vec3`.
+///
+/// # Arguments
+/// - `self`: The first vector.
+/// - `other`: The second vector.
+///
+/// # Returns
+/// A new `Vec3` representing the sum.
+///
+/// # Example
+/// ```
+/// let a = Vec3::new(3.0, 4.0, 5.0);
+/// let b = Vec3::new(1.0, 2.0, 3.0);
+/// let result = a + b; // Vec3 { x: 4.0, y: 6.0, z: 8.0 }
+/// ```
+impl Add for Vec3 {
+    type Output = Vec3;
+
+    fn add(self, other: Vec3) -> Vec3 {
+        Vec3 {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
     }
+}
 
-    /// Rotates the vector around the Z-axis by a given angle.
-    ///
-    /// # Arguments
-    /// - `angle`: The rotation angle in radians.
-    ///
-    /// # Returns
-    /// A new `Vec3` after rotation.
-    ///
-    /// # Formula
-    /// ```
-    /// x' = x * cos(angle) - y * sin(angle)
-    /// y' = x * sin(angle) + y * cos(angle)
-    /// ```
-    pub fn rotate_z(&self, angle: f32) -> Vec3 {
-        let x = self.x * angle.cos() - self.y * angle.sin();
-        let y = self.x * angle.sin() + self.y * angle.cos();
-        Vec3 { x, y, z: self.z }
+/// Implements scalar multiplication for `Vec3`.
+///
+/// # Arguments
+/// - `self`: The vector to be multiplied.
+/// - `scalar`: The scalar value.
+///
+/// # Returns
+/// A new `Vec3` representing the product.
+///
+/// # Example
+/// ```
+/// let v = Vec3::new(3.0, 4.0, 5.0);
+/// let result = v * 2.0; // Vec3 { x: 6.0, y: 8.0, z: 10.0 }
+/// ```
+impl Mul<f32> for Vec3 {
+    type Output = Vec3;
+
+    fn mul(self, scalar: f32) -> Vec3 {
+        Vec3 {
+            x: self.x * scalar,
+            y: self.y * scalar,
+            z: self.z * scalar,
+        }
+    }
+}
+
+/// Implements scalar division for `Vec3`.
+///
+/// # Arguments
+/// - `self`: The vector to be divided.
+/// - `scalar`: The scalar value.
+///
+/// # Returns
+/// A new `Vec3` representing the quotient.
+///
+/// # Example
+/// ```
+/// let v = Vec3::new(6.0, 8.0, 10.0);
+/// let result = v / 2.0; // Vec3 { x: 3.0, y: 4.0, z: 5.0 }
+/// ```
+impl Div<f32> for Vec3 {
+    type Output = Vec3;
+
+    fn div(self, scalar: f32) -> Vec3 {
+        Vec3 {
+            x: self.x / scalar,
+            y: self.y / scalar,
+            z: self.z / scalar,
+        }
+    }
+}
+
+/// Implements the negation operator for `Vec3`.
+///
+/// # Arguments
+/// - `self`: The vector to be negated.
+///
+/// # Returns
+/// A new `Vec3` with the negated components.
+///
+/// # Example
+/// ```
+/// let v = Vec3::new(3.0, 4.0, 5.0);
+/// let result = -v; // Vec3 { x: -3.0, y: -4.0, z: -5.0 }
+/// ```
+impl Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Vec3 {
+        Vec3 {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
     }
 }

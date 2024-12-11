@@ -48,7 +48,7 @@ impl Renderer {
     pub fn new(window: Window, sdl_context: Sdl) -> Renderer {
         let canvas = window
             .into_canvas()
-            .present_vsync() // Synchronize rendering with the display's refresh rate.
+            .present_vsync()
             .build()
             .map_err(|e| e.to_string())
             .unwrap();
@@ -61,8 +61,8 @@ impl Renderer {
             canvas,
             color_buffer,
             is_running: true,
-            fov_factor: 700.0, // Field of view scaling factor for projection.
-            camera_position: Vec3::new(0.0, 5.0, -5.0), // Initial camera position.
+            fov_factor: 700.0,
+            camera_position: Vec3::new(0.0, 0.0, 0.0),
             triangles_to_render: Vec::new(),
             mesh,
         }
@@ -74,12 +74,13 @@ impl Renderer {
     /// - `point`: A 3D point (`Vec3`) to project.
     ///
     /// # Returns
-    /// A 2D point (`Vec2`) representing the projected coordinates.
+    /// A 2D point (`Vec2`) representing the projected coordinates.    
     pub fn project(&mut self, point: vector::Vec3) -> vector::Vec2 {
-        vector::Vec2 {
+        let projected_point = vector::Vec2 {
             x: (self.fov_factor * point.x) / point.z,
             y: (self.fov_factor * point.y) / point.z,
-        }
+        };
+        projected_point
     }
 
     /// Processes user input and handles events such as quitting or camera movement.
@@ -99,7 +100,7 @@ impl Renderer {
             }
         }
     }
-
+    
     /// Updates the state of the mesh and prepares triangles for rendering.
     pub fn update(&mut self) {
         // Rotate the mesh slightly in each axis.
@@ -121,25 +122,48 @@ impl Renderer {
             let mut projected_triangle: triangle::Triangle = triangle::Triangle {
                 points: [vector::Vec2 { x: 0.0, y: 0.0 }; 3],
             };
+            let mut transformed_vertices: [Vec3; 3] = [Vec3::new(0.0, 0.0, 0.0); 3];
 
+            // Transforming vertices
             for j in 0..3 {
                 let mut transformed_vertex = face_vertices[j];
                 transformed_vertex = transformed_vertex.rotate_x(self.mesh.rotation.x);
                 transformed_vertex = transformed_vertex.rotate_y(self.mesh.rotation.y);
                 transformed_vertex = transformed_vertex.rotate_z(self.mesh.rotation.z);
 
-                // Translate the vertex relative to the camera position.
-                transformed_vertex.z -= self.camera_position.z;
+                transformed_vertex.z += 5.0;
+                transformed_vertices[j] = transformed_vertex;
+            }
 
-                // Project the transformed vertex to 2D.
-                let mut projected_point = self.project(transformed_vertex);
+            // Applying backface culling
+            // Getting vectors
+            let vector_a = transformed_vertices[0]; //     A
+            let vector_b = transformed_vertices[1]; //   /   \
+            let vector_c = transformed_vertices[2]; //  C-----B
+
+            // Calculate Normal
+            let vector_ab = vector_b - vector_a;
+            let vector_ac = vector_c - vector_a;
+            let normal = vector_ab.cross(vector_ac);
+
+            // Calculate Camera Ray
+            let camera_ray = self.camera_position - vector_a;
+
+            //  Calculate Camera Ray Dot Normal
+            let dot_camera = normal.dot(camera_ray);
+            if dot_camera < 0.0 {
+                continue;
+            }
+
+            // Projecting 3D points to 2D
+            for j in 0..3 {
+                let mut projected_point = self.project(transformed_vertices[j]);
 
                 // Center the projected point on the screen.
                 projected_point.x += display::WINDOW_WIDTH as f32 / 2.0;
                 projected_point.y += display::WINDOW_HEIGHT as f32 / 2.0;
                 projected_triangle.points[j] = projected_point;
             }
-
             // Add the projected triangle to the render list.
             self.triangles_to_render.push(projected_triangle);
         }
@@ -148,11 +172,14 @@ impl Renderer {
     /// Renders all triangles to the screen and updates the display.
     pub fn render(&mut self) {
         // Draw each triangle onto the color buffer.
-        for triangle in &self.triangles_to_render {
+        let num_triangles = self.triangles_to_render.len();
+
+        for i in 0..num_triangles {
+            let triangle = &self.triangles_to_render[i];
             display::draw_triangle(
                 &mut self.color_buffer,
                 triangle.points,
-                sdl2::pixels::Color::RGBA(0, 150, 0, 255), // Green color.
+                sdl2::pixels::Color::RGBA(0, 150, 0, 255),
             );
         }
 
